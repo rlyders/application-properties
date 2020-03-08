@@ -1,0 +1,2 @@
+# application-properties
+This Java ApplicationProperties package provides a fast and easily configured application.properties loader that mimics some key features of the Spring Boot application.properties loader. This package allows for multi-level overloading of properties from various different property files located in the classpath, multiple optional file paths along with the JNDI server container context.
