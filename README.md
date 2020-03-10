@@ -162,6 +162,50 @@ mvn clean test
 mvn clean package
 ```
 
+## Deploy to Apache Maven (i.e., "Maven Central") via Sonatype.org
+
+ * from: https://central.sonatype.org/pages/apache-maven.html
+This is what I did at first that bypassed the staging repo and automatically released it to Sonatype and thus Maven Central. 
+```
+mvn clean deploy
+```
+
+To avoid slowing down every build, I moved the javadoc, gpg, and source plugins under the release profile so that I should be able to run when I want to deploy it:
+```
+mvn clean deploy -P release
+```
+
+Additionally, I wanted to be able to validate the deployment in staging repo first, then deploy it. So, I set <autoReleaseAfterClose> to false. 
+
+With the property autoReleaseAfterClose set to false you can manually inspect the staging repository in the Nexus Repository Manager and trigger a release of the staging repository later with
+
+```
+mvn nexus-staging:release
+```
+
+If you find something went wrong you can drop the staging repository with
+
+```
+mvn nexus-staging:drop
+```
+
+Please read Build Promotion with the Nexus Staging Suite in the book Repository Management with Nexus for more information about the Nexus Staging Maven Plugin.
+
+... *OR* ...
+  
+If your version is a release version (does not end in -SNAPSHOT) and with this setup in place, you can run a deployment to OSSRH and an automated release to the Central Repository with the usual:
+
+```
+mvn release:clean release:prepare
+```
+
+by answering the prompts for versions and tags, followed by
+```
+mvn release:perform
+```
+
+This execution will deploy to OSSRH and release to the Central Repository in one go, thanks to the usage of the Nexus Staging Maven Plugin with autoReleaseAfterClose set to true.
+
 ## Built With
 
  * [Maven 3.6.3](https://maven.apache.org/) - Dependency Management
