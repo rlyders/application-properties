@@ -4,7 +4,7 @@
 
     <groupId>com.lyders</groupId>
     <artifactId>application-properties</artifactId>
-    <version>mvn release:perform</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <name>ApplicationProperties Java properties loader</name>
     <description>
@@ -245,10 +245,10 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:git:git://github.com/rlyders/application-properties.git</connection>
+        <connection>scm:git:git@github.com:rlyders/application-properties.git</connection>
         <developerConnection>scm:git:git@github.com:rlyders/application-properties.git</developerConnection>
         <url>https://github.com/rlyders/application-properties</url>
-        <tag>application-properties-mvn release:perform</tag>
+        <tag>HEAD</tag>
     </scm>
 
 </project>
