@@ -4,7 +4,50 @@
 
     <groupId>com.lyders</groupId>
     <artifactId>application-properties</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>mvn release:perform</version>
+
+    <name>ApplicationProperties Java properties loader</name>
+    <description>
+        This ApplicationProperties Java package provides a fast and easily configurable application.properties loader that mimics some key features of the Spring Boot application.properties loader. This package allows for multi-level overloading of properties based on a basename and optional suffix by searching the classpath, optional configurable file paths along with the JNDI server container context.
+
+        The class [ApplicationPropertiesConfig](src/main/java/com/lyders/application-properties/ApplicationPropertiesConfig.java) controls the features of the overloading of properties such as the base name of the properties file, an optional suffix that allows for the loading of environment-specific or scenario-specific property files as needed.
+
+        The following features are supported:
+        * Names of properties files can be customized
+        * Locations of properties files can be customized. The following path types are supported:
+        * class path
+        * file system paths
+        * JNDI environment naming context (e.g., Servlet/JSP running under Tomcat)
+        * Environment-specific property files can override the values in default properties files via a "suffix"
+    </description>
+    <url>https://github.com/rlyders/application-properties</url>
+
+    <licenses>
+        <license>
+            <name>The MIT License</name>
+            <url>https://raw.githubusercontent.com/rlyders/application-properties/master/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>Richard@Lyders.com</id>
+            <name>Richard Lyders</name>
+            <email>Richard@Lyders.com</email>
+            <organization>Lyders Consulting, Inc.</organization>
+            <organizationUrl>http://richardlyders.com/</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>-5</timezone>
+
+            <properties>
+                <picUrl>https://avatars2.githubusercontent.com/u/4387200</picUrl>
+            </properties>
+        </developer>
+    </developers>
 
     <properties>
         <app.id>application-properties</app.id>
@@ -205,7 +248,7 @@
         <connection>scm:git:git://github.com/rlyders/application-properties.git</connection>
         <developerConnection>scm:git:git@github.com:rlyders/application-properties.git</developerConnection>
         <url>https://github.com/rlyders/application-properties</url>
-        <tag>HEAD</tag>
+        <tag>application-properties-mvn release:perform</tag>
     </scm>
 
 </project>
