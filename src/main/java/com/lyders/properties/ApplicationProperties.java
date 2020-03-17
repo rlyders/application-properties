@@ -1,8 +1,11 @@
 package com.lyders.properties;
 
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.*;
@@ -15,6 +18,7 @@ import static com.lyders.properties.ApplicationProperties.PATH_TYPE.*;
 /**
  * @author Richard@Lyders.com
  */
+@Data
 public class ApplicationProperties extends HashMap<String, String> {
 
     enum PATH_TYPE {
@@ -41,6 +45,8 @@ public class ApplicationProperties extends HashMap<String, String> {
 
     private final String propertiesFileName;
     private final String suffixedFileName;
+
+    LinkedHashMap<String, Properties> sources = new LinkedHashMap<>();
 
     /* Overloaded constructor that passes null for config parameter of main constructor
      * */
@@ -85,19 +91,25 @@ public class ApplicationProperties extends HashMap<String, String> {
 
     void loadPropertiesFromClassPath(String pathStr, String propertiesFileName) throws FileNotFoundException {
         String filePathStr = Paths.get(pathStr, propertiesFileName).toString();
+        URL res = this.getClass().getClassLoader().getResource(filePathStr);
         try {
+            File file = Paths.get(res.toURI()).toFile();
+            String absolutePath = file.getAbsolutePath();
             Properties properties = new Properties();
-            properties.load(this.getClass().getClassLoader().getResourceAsStream(filePathStr));
+            properties.load(res.openStream());
+            logSourceFilePathAndProperties(absolutePath, properties);
             putAll((Map) properties);
-        } catch (NullPointerException | IOException e) {
+        } catch (NullPointerException | IOException | URISyntaxException e ) {
             throw new FileNotFoundException(String.format(FAILED_TO_LOAD_PROPERTIES_FROM_CLASS_PATH_MSG_TEMPLATE, PATH_TYPE.CLASSPATH_PREFIX, propertiesFileName, pathStr));
         }
     }
 
     void loadPropertiesFromFileSystem(String pathStr, String propertiesFileName) throws FileNotFoundException {
-        try (FileReader fileReader = new FileReader(Paths.get(pathStr, propertiesFileName).toString(), Charset.forName("UTF-8"))) {
+        String filePathStr = Paths.get(pathStr, propertiesFileName).toAbsolutePath().toString();
+        try (FileReader fileReader = new FileReader(filePathStr, Charset.forName("UTF-8"))) {
             Properties properties = new Properties();
             properties.load(fileReader);
+            logSourceFilePathAndProperties(filePathStr, properties);
             putAll((Map) properties);
         } catch (IOException e) {
             throw new FileNotFoundException(String.format(FAILED_TO_LOAD_PROPERTIES_FROM_CLASS_PATH_MSG_TEMPLATE, PATH_TYPE.FILEPATH_PREFIX, propertiesFileName, pathStr));
@@ -105,10 +117,11 @@ public class ApplicationProperties extends HashMap<String, String> {
     }
 
     void loadPropertiesFromServletPath(String pathStr, String propertiesFileName) throws FileNotFoundException {
-        try (FileReader fileReader = new FileReader(Paths.get(cfg.getServletPropertiesBaseDirectory(), pathStr, propertiesFileName).toString(), Charset.forName("UTF-8"))) {
+        String filePathStr = Paths.get(cfg.getServletPropertiesBaseDirectory(), pathStr, propertiesFileName).toAbsolutePath().toString();
+        try (FileReader fileReader = new FileReader(filePathStr, Charset.forName("UTF-8"))) {
             Properties properties = new Properties();
-
             properties.load(fileReader);
+            logSourceFilePathAndProperties(filePathStr, properties);
             putAll((Map) properties);
         } catch (IOException e) {
             throw new FileNotFoundException(String.format(FAILED_TO_LOAD_PROPERTIES_FROM_CLASS_PATH_MSG_TEMPLATE, PATH_TYPE.FILEPATH_PREFIX, propertiesFileName, pathStr));
@@ -173,9 +186,33 @@ public class ApplicationProperties extends HashMap<String, String> {
         }
     }
 
-    public void printAllEntries(Consumer<String> f) {
+    /* utility method to print out a list of all the final property values
+    * */
+    public void printAllProperties(Consumer<String> f) {
         for (Map.Entry entry : entrySet()) {
             f.accept(entry.getKey() + ": " + entry.getValue());
+        }
+    }
+
+    /* utility method to print out a detailed list of which properties were loaded from each file
+    * */
+    public void printAllSourcesAndProperties(Consumer<String> f) {
+        int fileIdx = 0;
+        for (Map.Entry source : sources.entrySet()) {
+            String fileName = (String) source.getKey();
+            f.accept(String.format( "Source file %d: %s", ++fileIdx, fileName ) );
+            Properties properties = (Properties) source.getValue();
+            Iterator iterator = properties.keySet().iterator();
+            while (iterator.hasNext()) {
+                String key = (String) iterator.next();
+                f.accept(String.format("    %s=%s", key, properties.get(key)));
+            }
+        }
+    }
+
+    private void logSourceFilePathAndProperties(String filePathStr, Properties properties) {
+        if (cfg.isLogSourceFilePathsAndProperties()) {
+            sources.put(filePathStr, properties);
         }
     }
 

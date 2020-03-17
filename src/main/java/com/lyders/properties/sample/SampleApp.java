@@ -16,7 +16,15 @@ public class SampleApp {
         ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(null, "-unittest",
                 ApplicationPropertiesConfig.LoadClassPathRootPropertiesAsDefaults.NO);
         ApplicationProperties properties = new ApplicationProperties(cfg, "conf");
-        properties.printAllEntries(System.out::println);
+        System.out.println("...................");
+        System.out.println("Properties per file");
+        System.out.println("...................");
+        properties.printAllSourcesAndProperties(System.out::println);
+
+        System.out.println("...................");
+        System.out.println("Final property values");
+        System.out.println("...................");
+        properties.printAllProperties(System.out::println);
     }
 
 }

@@ -3,6 +3,9 @@ package com.lyders.properties;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
+import java.nio.file.Paths;
+import java.util.LinkedHashMap;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -239,6 +242,46 @@ public class ApplicationPropertiesTests {
         Matcher matcher = pathTypePattern.matcher(pathStr);
         assertTrue(matcher.find());
         assertEquals(myPath, matcher.group(2));
+    }
+
+    @Test
+    // not really a unit test, but just a visual helper to show all what properties were loaded to each properties file
+    public void testPrintAllSourcesAndEntries() throws FileNotFoundException {
+        ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig("myapp.properties", "-unittest", LoadClassPathRootPropertiesAsDefaults.YES);
+        ApplicationProperties properties = new ApplicationProperties(cfg, "conf");
+        System.out.println("...................");
+        System.out.println("Properties per file");
+        System.out.println("...................");
+        properties.printAllSourcesAndProperties(System.out::println);
+
+        System.out.println("...................");
+        System.out.println("Final property values");
+        System.out.println("...................");
+        properties.printAllProperties(System.out::println);
+    }
+
+    @Test
+    public void checkSourcesAreNotLogged() throws FileNotFoundException {
+        ApplicationProperties properties = new ApplicationProperties();
+        assertEquals(0, properties.getSources().size() );
+    }
+
+    @Test
+    public void checkSourcesAreLogged() throws FileNotFoundException {
+        String propFile = "myapp.properties";
+        String propPath = "conf";
+        String propFileSuffix = "-unittest";
+        ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(propFile, propFileSuffix, LoadClassPathRootPropertiesAsDefaults.YES, LogSourceFilePathsAndProperties.YES);
+        ApplicationProperties properties = new ApplicationProperties(cfg, propPath);
+        String userDir = System.getProperty("user.dir");
+        LinkedHashMap<String, Properties> sources = properties.getSources();
+
+        String propFilePath = Paths.get(userDir, propPath, propFile).toString();
+        assertTrue(sources.containsKey(propFilePath));
+
+        String suffixedPropFilePath = Paths.get(userDir, propPath, cfg.getSuffixFileName()).toString();
+        assertTrue(sources.containsKey(suffixedPropFilePath));
+
     }
 
 }

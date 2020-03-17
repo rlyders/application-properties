@@ -11,6 +11,7 @@ The following features are supported:
     * file system paths
     * JNDI environment naming context (e.g., Servlet/JSP running under Tomcat)
   * Environment-specific property files can override the values in default properties files via a "suffix"
+  * debug logging of all source property files loaded and the properties loaded from each. Enable this feature by passing parameter LogSourceFilePathsAndProperties.YES. See the unit test named "checkSourcesAreLogged()" for more details.
    
 The overloading order of the files is controlled by a simple ordering of path parameters given to the constructor.
 
@@ -69,6 +70,18 @@ Sample output based on sample properties files in this project:
   * [file:conf](conf)
   * [classpath:](src/test/resources)
 ```
+...................
+Properties per file
+...................
+Source file 1: C:\Users\Richa\projects\application-properties\conf\application.properties
+    conf-dir-application-properties=conf-dir-application.properties
+    test=conf directory
+Source file 2: C:\Users\Richa\projects\application-properties\conf\application-unittest.properties
+    test=conf directory unittest suffix
+    conf-dir-application-unittest-properties=conf-dir-application-unittest.properties
+...................
+Final property values
+...................
 test: conf directory unittest suffix
 conf-dir-application-unittest-properties: conf-dir-application-unittest.properties
 conf-dir-application-properties: conf-dir-application.properties
