@@ -2,6 +2,7 @@ package com.lyders.properties;
 
 import org.junit.jupiter.api.Test;
 
+import javax.sound.midi.SysexMessage;
 import java.io.FileNotFoundException;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
@@ -281,7 +282,16 @@ public class ApplicationPropertiesTests {
 
         String suffixedPropFilePath = Paths.get(userDir, propPath, cfg.getSuffixFileName()).toString();
         assertTrue(sources.containsKey(suffixedPropFilePath));
-
     }
 
+    @Test
+    public void printApplicationPropertiesToString() throws FileNotFoundException {
+        String propFile = "myapp.properties";
+        String propPath = "conf";
+        String propFileSuffix = "-unittest";
+        ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(propFile, propFileSuffix, LoadClassPathRootPropertiesAsDefaults.YES, LogSourceFilePathsAndProperties.YES);
+        System.out.println("cfg.toString="+cfg.toString());
+        ApplicationProperties props = new ApplicationProperties(cfg, propPath);
+        System.out.println("props.toString="+props.toString());
+    }
 }

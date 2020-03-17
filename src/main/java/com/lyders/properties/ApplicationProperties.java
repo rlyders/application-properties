@@ -46,7 +46,7 @@ public class ApplicationProperties extends HashMap<String, String> {
     private final String propertiesFileName;
     private final String suffixedFileName;
 
-    LinkedHashMap<String, Properties> sources = new LinkedHashMap<>();
+    private final LinkedHashMap<String, Properties> sources = new LinkedHashMap<>();
 
     /* Overloaded constructor that passes null for config parameter of main constructor
      * */
@@ -214,6 +214,10 @@ public class ApplicationProperties extends HashMap<String, String> {
         if (cfg.isLogSourceFilePathsAndProperties()) {
             sources.put(filePathStr, properties);
         }
+    }
+
+    public String toString() {
+        return String.format( "propertiesFileName=%s, suffixedFileName=%s, cfg=%s, sources=%s", propertiesFileName, suffixedFileName, cfg.toString(), sources.toString() );
     }
 
 }

@@ -40,12 +40,10 @@ public class ApplicationPropertiesConfig {
     private final String propertiesFileName;
     private final String overrideSuffix;
     private final LoadClassPathRootPropertiesAsDefaults loadClassPathRootPropertiesAsDefaults;
+    private final LogSourceFilePathsAndProperties logSourceFilePathsAndProperties;
     private final HashSet<String> paths = new HashSet<String>();
     private final ServletContext servletContext;
     private final String servletPropertiesBaseDirectory;
-    private String SERVLET_PARENT_DIR;
-
-    private final LogSourceFilePathsAndProperties logSourceFilePathsAndProperties;
 
     /* construct a new instance with all default values
      * */
@@ -191,6 +189,11 @@ public class ApplicationPropertiesConfig {
 
     boolean isLogSourceFilePathsAndProperties() {
         return logSourceFilePathsAndProperties.equals(LogSourceFilePathsAndProperties.YES);
+    }
+
+    public String toString() {
+        return String.format( "propertiesFileName=%s, overrideSuffix=%s, loadClassPathRootPropertiesAsDefaults=%s, logSourceFilePathsAndProperties=%s, paths=%s, servletContext=%s, servletPropertiesBaseDirectory=%s",
+                propertiesFileName, overrideSuffix, loadClassPathRootPropertiesAsDefaults, logSourceFilePathsAndProperties, paths.toString(), servletContext, servletPropertiesBaseDirectory);
     }
 
 }
