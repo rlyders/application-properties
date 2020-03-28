@@ -102,25 +102,25 @@ public class ApplicationPropertiesConfig {
     /* construct a new instance based on a server container context in order to load properties files from a JDNI context: overloaded with defaults to not require LoadClassPathRootPropertiesAsDefaults
      * */
     public ApplicationPropertiesConfig(ServletContext servletContext, String propertiesFileName, String overrideSuffix, LogSourceFilePathsAndProperties logSourceFilePathsAndProperties, String... additionalPaths) {
-        this( servletContext, propertiesFileName, overrideSuffix, LoadClassPathRootPropertiesAsDefaults.YES, logSourceFilePathsAndProperties, additionalPaths );
+        this(servletContext, propertiesFileName, overrideSuffix, LoadClassPathRootPropertiesAsDefaults.YES, logSourceFilePathsAndProperties, additionalPaths);
     }
 
     /* construct a new instance based on a server container context in order to load properties files from a JDNI context: overloaded with defaults to not require LogSourceFilePathsAndProperties
      * */
     public ApplicationPropertiesConfig(ServletContext servletContext, String propertiesFileName, String overrideSuffix, LoadClassPathRootPropertiesAsDefaults loadClassPathRootPropertiesAsDefaults, String... additionalPaths) {
-        this( servletContext, propertiesFileName, overrideSuffix, loadClassPathRootPropertiesAsDefaults, LogSourceFilePathsAndProperties.NO, additionalPaths );
+        this(servletContext, propertiesFileName, overrideSuffix, loadClassPathRootPropertiesAsDefaults, LogSourceFilePathsAndProperties.NO, additionalPaths);
     }
 
     /* construct a new instance based on a server container context in order to load properties files from a JDNI context: overloaded with defaults to not require LoadClassPathRootPropertiesAsDefaults or LogSourceFilePathsAndProperties
      * */
     public ApplicationPropertiesConfig(ServletContext servletContext, String propertiesFileName, String overrideSuffix, String... additionalPaths) {
-        this( servletContext, propertiesFileName, overrideSuffix, LoadClassPathRootPropertiesAsDefaults.YES, LogSourceFilePathsAndProperties.NO, additionalPaths );
+        this(servletContext, propertiesFileName, overrideSuffix, LoadClassPathRootPropertiesAsDefaults.YES, LogSourceFilePathsAndProperties.NO, additionalPaths);
     }
 
     /* construct a new instance based on a server container context in order to load properties files from a JDNI context: overloaded with defaults to not require any additional params but ServletContext
      * */
     public ApplicationPropertiesConfig(ServletContext servletContext) {
-        this( servletContext, null, null, LoadClassPathRootPropertiesAsDefaults.YES, LogSourceFilePathsAndProperties.NO, null);
+        this(servletContext, null, null, LoadClassPathRootPropertiesAsDefaults.YES, LogSourceFilePathsAndProperties.NO, null);
     }
 
     /* construct a new instance based on a server container context in order to load properties files from a JDNI context
@@ -143,8 +143,12 @@ public class ApplicationPropertiesConfig {
         if (additionalPaths != null && additionalPaths.length > 0) {
             paths.addAll(Arrays.asList(additionalPaths));
         } else {
-            paths.add(Paths.get(DEFAULT_SERVLET_PROPERTIES_PARENT_DIR, DEFAULT_SERVLET_PROPERTIES_SUB_DIR, getServletContextName()).toString());
+            paths.add(getServletDefaultPropertiesFilePath());
         }
+    }
+
+    String getServletDefaultPropertiesFilePath() {
+        return ApplicationProperties.PATH_TYPE.SERVLET_PREFIX + Paths.get(DEFAULT_SERVLET_PROPERTIES_PARENT_DIR, DEFAULT_SERVLET_PROPERTIES_SUB_DIR, getServletContextName()).toString();
     }
 
     public String getSuffixFileName() {
@@ -169,7 +173,7 @@ public class ApplicationPropertiesConfig {
         if (this.servletContext == null) {
             throw new IllegalStateException("Given ServletContext must not be null");
         }
-        return servletContext.getContextPath().substring(1);
+        return servletContext.getServletContextName();
     }
 
     public String getServletPropertiesBaseDirectory() {
@@ -192,7 +196,7 @@ public class ApplicationPropertiesConfig {
     }
 
     public String toString() {
-        return String.format( "propertiesFileName=%s, overrideSuffix=%s, loadClassPathRootPropertiesAsDefaults=%s, logSourceFilePathsAndProperties=%s, paths=%s, servletContext=%s, servletPropertiesBaseDirectory=%s",
+        return String.format("propertiesFileName=%s, overrideSuffix=%s, loadClassPathRootPropertiesAsDefaults=%s, logSourceFilePathsAndProperties=%s, paths=%s, servletContext=%s, servletPropertiesBaseDirectory=%s",
                 propertiesFileName, overrideSuffix, loadClassPathRootPropertiesAsDefaults, logSourceFilePathsAndProperties, paths.toString(), servletContext, servletPropertiesBaseDirectory);
     }
 

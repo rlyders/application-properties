@@ -2,11 +2,15 @@ package com.lyders.properties;
 
 import org.junit.jupiter.api.Test;
 
+import javax.servlet.*;
+import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.sound.midi.SysexMessage;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -264,7 +268,7 @@ public class ApplicationPropertiesTests {
     @Test
     public void checkSourcesAreNotLogged() throws FileNotFoundException {
         ApplicationProperties properties = new ApplicationProperties();
-        assertEquals(0, properties.getSources().size() );
+        assertEquals(0, properties.getSources().size());
     }
 
     @Test
@@ -290,8 +294,26 @@ public class ApplicationPropertiesTests {
         String propPath = "conf";
         String propFileSuffix = "-unittest";
         ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(propFile, propFileSuffix, LoadClassPathRootPropertiesAsDefaults.YES, LogSourceFilePathsAndProperties.YES);
-        System.out.println("cfg.toString="+cfg.toString());
+        System.out.println("cfg.toString=" + cfg.toString());
         ApplicationProperties props = new ApplicationProperties(cfg, propPath);
-        System.out.println("props.toString="+props.toString());
+        System.out.println("props.toString=" + props.toString());
     }
+
+    @Test
+    public void servletConfigDefaultPathTest() throws FileNotFoundException {
+        String propFile = "my-servlet.conf";
+        String servletContextName = "my-servlet";
+        ServletContext servletContext = new MockServletContext(servletContextName);
+        ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(servletContext, propFile, null, LoadClassPathRootPropertiesAsDefaults.YES, LogSourceFilePathsAndProperties.YES);
+
+        String expectedServletDetaultPropertiesFilePath = "servlet:" + Paths.get("conf", "apps", servletContextName);
+
+        String actualServletDefaultPropertiesFilePath = cfg.getServletDefaultPropertiesFilePath();
+        assertEquals(expectedServletDetaultPropertiesFilePath, actualServletDefaultPropertiesFilePath);
+
+        HashSet<String> paths = cfg.getPaths();
+        String path = paths.stream().findFirst().get();
+        assertEquals(expectedServletDetaultPropertiesFilePath, path);
+    }
+
 }

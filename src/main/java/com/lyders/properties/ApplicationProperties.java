@@ -69,7 +69,7 @@ public class ApplicationProperties extends HashMap<String, String> {
         } else {
             this.cfg = new ApplicationPropertiesConfig();
         }
-        if (pathTypeStrs != null) {
+        if (pathTypeStrs != null && pathTypeStrs.length > 0) {
             // append additional paths to local copy of the given config
             this.cfg.getPaths().addAll(Arrays.asList(pathTypeStrs));
         }
@@ -77,10 +77,6 @@ public class ApplicationProperties extends HashMap<String, String> {
         propertiesFileName = this.cfg.getPropertiesFileName();
         suffixedFileName = this.cfg.getSuffixFileName();
 
-        if (pathTypeStrs != null) {
-            // add the optional list of paths given via the constructor parameter
-            this.cfg.getPaths().addAll(Arrays.asList(pathTypeStrs));
-        }
         init();
     }
 

@@ -177,27 +177,23 @@ mvn clean package
 
 ## Deploy to Apache Maven (i.e., "Maven Central") via Sonatype.org
 
- * from: https://central.sonatype.org/pages/apache-maven.html
-This is what I did at first that bypassed the staging repo and automatically released it to Sonatype and thus Maven Central. 
-```
-mvn clean deploy
-```
+from: https://central.sonatype.org/pages/apache-maven.html
 
-To avoid slowing down every build, I moved the javadoc, gpg, and source plugins under the release profile so that I should be able to run when I want to deploy it:
+### Upload release to Sonatype staging repo. 
+
+NOTES: 
+* To avoid slowing down every build, I moved the javadoc, gpg, and source plugins under the release profile.
+* I wanted to be able to validate the deployment in staging repo first, then deploy it. So, I set <autoReleaseAfterClose> to false. 
 ```
 mvn clean deploy -P release
 ```
 
-Additionally, I wanted to be able to validate the deployment in staging repo first, then deploy it. So, I set <autoReleaseAfterClose> to false. 
-
 With the property autoReleaseAfterClose set to false you can manually inspect the staging repository in the Nexus Repository Manager and trigger a release of the staging repository later with
-
 ```
 mvn nexus-staging:release
 ```
 
 If you find something went wrong you can drop the staging repository with
-
 ```
 mvn nexus-staging:drop
 ```
