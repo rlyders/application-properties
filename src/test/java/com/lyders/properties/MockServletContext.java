@@ -15,15 +15,22 @@ import static com.lyders.properties.ApplicationPropertiesConfig.CATALINA_BASE;
 public class MockServletContext implements ServletContext {
 
     private final String servletContextName;
+    private final String servletContextPath;
 
-    MockServletContext(String servletContextName) {
+    MockServletContext(String servletContextName, String servletContextPath) {
         this.servletContextName = servletContextName;
+
+        if (!servletContextPath.startsWith("/")) {
+            servletContextPath = servletContextPath + "/";
+        }
+
+        this.servletContextPath = servletContextPath;
         System.setProperty(CATALINA_BASE, "/");
     }
 
     @Override
     public String getContextPath() {
-        return "/" + servletContextName;
+        return servletContextPath;
     }
 
     @Override

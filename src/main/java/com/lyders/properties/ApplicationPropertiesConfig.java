@@ -34,6 +34,7 @@ public class ApplicationPropertiesConfig {
     public static final String CATALINA_BASE = "catalina.base";
     public static final String CATALINA_COMMON = "catalina.common";
 
+    public static final String DEFAULT_SERVLET_PROPERTIES_FILE_EXT = ".conf";
     public static final String DEFAULT_SERVLET_PROPERTIES_PARENT_DIR = "conf";
     public static final String DEFAULT_SERVLET_PROPERTIES_SUB_DIR = "apps";
 
@@ -134,7 +135,7 @@ public class ApplicationPropertiesConfig {
         if (!StringUtils.isEmpty(propertiesFileName)) {
             this.propertiesFileName = propertiesFileName;
         } else {
-            this.propertiesFileName = getServletContextName();
+            this.propertiesFileName = getServletContextPath().replaceAll("^/", "") + DEFAULT_SERVLET_PROPERTIES_FILE_EXT;
         }
 
         this.overrideSuffix = overrideSuffix;
@@ -148,7 +149,7 @@ public class ApplicationPropertiesConfig {
     }
 
     String getServletDefaultPropertiesFilePath() {
-        return ApplicationProperties.PATH_TYPE.SERVLET_PREFIX + Paths.get(DEFAULT_SERVLET_PROPERTIES_PARENT_DIR, DEFAULT_SERVLET_PROPERTIES_SUB_DIR, getServletContextName()).toString();
+        return ApplicationProperties.PATH_TYPE.SERVLET_PREFIX + Paths.get(DEFAULT_SERVLET_PROPERTIES_PARENT_DIR, DEFAULT_SERVLET_PROPERTIES_SUB_DIR, getServletContextPath()).toString();
     }
 
     public String getSuffixFileName() {
@@ -171,9 +172,16 @@ public class ApplicationPropertiesConfig {
 
     public String getServletContextName() {
         if (this.servletContext == null) {
-            throw new IllegalStateException("Given ServletContext must not be null");
+            throw new IllegalStateException("ServletContext must not be null to get the context name");
         }
         return servletContext.getServletContextName();
+    }
+
+    public String getServletContextPath() {
+        if (this.servletContext == null) {
+            throw new IllegalStateException("ServletContext must not be null to get the context path");
+        }
+        return servletContext.getContextPath();
     }
 
     public String getServletPropertiesBaseDirectory() {

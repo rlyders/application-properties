@@ -302,11 +302,12 @@ public class ApplicationPropertiesTests {
     @Test
     public void servletConfigDefaultPathTest() throws FileNotFoundException {
         String propFile = "my-servlet.conf";
-        String servletContextName = "my-servlet";
-        ServletContext servletContext = new MockServletContext(servletContextName);
+        String servletContextName = "My Servlet";
+        String servletContextPath = "/my-servlet";
+        ServletContext servletContext = new MockServletContext(servletContextName, servletContextPath);
         ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(servletContext, propFile, null, LoadClassPathRootPropertiesAsDefaults.YES, LogSourceFilePathsAndProperties.YES);
 
-        String expectedServletDetaultPropertiesFilePath = "servlet:" + Paths.get("conf", "apps", servletContextName);
+        String expectedServletDetaultPropertiesFilePath = "servlet:" + Paths.get("conf", "apps", servletContextPath);
 
         String actualServletDefaultPropertiesFilePath = cfg.getServletDefaultPropertiesFilePath();
         assertEquals(expectedServletDetaultPropertiesFilePath, actualServletDefaultPropertiesFilePath);
