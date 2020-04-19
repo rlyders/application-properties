@@ -21,7 +21,7 @@ import static com.lyders.properties.ApplicationProperties.PATH_TYPE.*;
 @Data
 public class ApplicationProperties extends HashMap<String, String> {
 
-    enum PATH_TYPE {
+    public enum PATH_TYPE {
         CLASSPATH_PREFIX("classpath:"),
         FILEPATH_PREFIX("file:"),
         SERVLET_PREFIX("servlet:");

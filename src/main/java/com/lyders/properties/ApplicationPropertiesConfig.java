@@ -42,7 +42,7 @@ public class ApplicationPropertiesConfig {
     private final String overrideSuffix;
     private final LoadClassPathRootPropertiesAsDefaults loadClassPathRootPropertiesAsDefaults;
     private final LogSourceFilePathsAndProperties logSourceFilePathsAndProperties;
-    private final HashSet<String> paths = new HashSet<String>();
+    private final List<String> paths = new ArrayList<String>();
     private final ServletContext servletContext;
     private final String servletPropertiesBaseDirectory;
 

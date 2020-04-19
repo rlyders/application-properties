@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.lyders.properties.ApplicationProperties.*;
+import static com.lyders.properties.ApplicationProperties.PATH_TYPE.SERVLET_PREFIX;
 import static com.lyders.properties.ApplicationPropertiesConfig.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -243,7 +244,7 @@ public class ApplicationPropertiesTests {
     public void testRegExWithServletPath() {
         Pattern pathTypePattern = Pattern.compile(PATH_TYPE_REGEX);
         String myPath = "gibberishServletPath";
-        String pathStr = PATH_TYPE.SERVLET_PREFIX.value + myPath;
+        String pathStr = SERVLET_PREFIX.value + myPath;
         Matcher matcher = pathTypePattern.matcher(pathStr);
         assertTrue(matcher.find());
         assertEquals(myPath, matcher.group(2));
@@ -307,12 +308,12 @@ public class ApplicationPropertiesTests {
         ServletContext servletContext = new MockServletContext(servletContextName, servletContextPath);
         ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(servletContext, propFile, null, LoadClassPathRootPropertiesAsDefaults.YES, LogSourceFilePathsAndProperties.YES);
 
-        String expectedServletDetaultPropertiesFilePath = "servlet:" + Paths.get("conf", "apps", servletContextPath);
+        String expectedServletDetaultPropertiesFilePath = SERVLET_PREFIX.value + Paths.get("conf", "apps", servletContextPath);
 
         String actualServletDefaultPropertiesFilePath = cfg.getServletDefaultPropertiesFilePath();
         assertEquals(expectedServletDetaultPropertiesFilePath, actualServletDefaultPropertiesFilePath);
 
-        HashSet<String> paths = cfg.getPaths();
+        List<String> paths = cfg.getPaths();
         String path = paths.stream().findFirst().get();
         assertEquals(expectedServletDetaultPropertiesFilePath, path);
     }
