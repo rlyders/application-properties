@@ -89,13 +89,11 @@ public class ApplicationProperties extends HashMap<String, String> {
         String filePathStr = Paths.get(pathStr, propertiesFileName).toString();
         URL res = this.getClass().getClassLoader().getResource(filePathStr);
         try {
-            File file = Paths.get(res.toURI()).toFile();
-            String absolutePath = file.getAbsolutePath();
             Properties properties = new Properties();
             properties.load(res.openStream());
-            logSourceFilePathAndProperties(absolutePath, properties);
+            logSourceFilePathAndProperties(res.toString(), properties);
             putAll((Map) properties);
-        } catch (NullPointerException | IOException | URISyntaxException e ) {
+        } catch (NullPointerException | IOException e) {
             throw new FileNotFoundException(String.format(FAILED_TO_LOAD_PROPERTIES_FROM_CLASS_PATH_MSG_TEMPLATE, PATH_TYPE.CLASSPATH_PREFIX, propertiesFileName, pathStr));
         }
     }
@@ -183,7 +181,7 @@ public class ApplicationProperties extends HashMap<String, String> {
     }
 
     /* utility method to print out a list of all the final property values
-    * */
+     * */
     public void printAllProperties(Consumer<String> f) {
         for (Map.Entry entry : entrySet()) {
             f.accept(entry.getKey() + ": " + entry.getValue());
@@ -191,12 +189,12 @@ public class ApplicationProperties extends HashMap<String, String> {
     }
 
     /* utility method to print out a detailed list of which properties were loaded from each file
-    * */
+     * */
     public void printAllSourcesAndProperties(Consumer<String> f) {
         int fileIdx = 0;
         for (Map.Entry source : sources.entrySet()) {
             String fileName = (String) source.getKey();
-            f.accept(String.format( "Source file %d: %s", ++fileIdx, fileName ) );
+            f.accept(String.format("Source file %d: %s", ++fileIdx, fileName));
             Properties properties = (Properties) source.getValue();
             Iterator iterator = properties.keySet().iterator();
             while (iterator.hasNext()) {
@@ -213,7 +211,7 @@ public class ApplicationProperties extends HashMap<String, String> {
     }
 
     public String toString() {
-        return String.format( "propertiesFileName=%s, suffixedFileName=%s, cfg=%s, sources=%s", propertiesFileName, suffixedFileName, cfg.toString(), sources.toString() );
+        return String.format("propertiesFileName=%s, suffixedFileName=%s, cfg=%s, sources=%s", propertiesFileName, suffixedFileName, cfg.toString(), sources.toString());
     }
 
 }
