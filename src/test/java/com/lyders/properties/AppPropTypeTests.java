@@ -2,11 +2,11 @@ package com.lyders.properties;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.ClearSystemProperty;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
 import org.junitpioneer.jupiter.SetSystemProperty;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /* Richard@Lyders.com created on 2/14/2021 */
 class AppPropTypeTests {
@@ -31,7 +31,7 @@ class AppPropTypeTests {
     }
 
     @Test
-    void longTests() {
+    void longTests() throws PropertyEvaluatorException {
         Long testLong = props.getLong("test.long");
         assertEquals(Long.valueOf(1234567891234L), testLong);
         Long missingLong = props.getLong("missing.long");
@@ -39,7 +39,7 @@ class AppPropTypeTests {
     }
 
     @Test
-    void integerTests() {
+    void integerTests() throws PropertyEvaluatorException {
         Integer testInt = props.getInteger("test.int");
         assertEquals(Integer.valueOf(123), testInt);
         Integer missingInt = props.getInteger("missing.int");
@@ -47,7 +47,7 @@ class AppPropTypeTests {
     }
 
     @Test
-    void booleanTests() {
+    void booleanTests() throws PropertyEvaluatorException {
         Boolean testBoolean = props.getBoolean("test.boolean");
         assertEquals(Boolean.valueOf("true"), testBoolean);
         Boolean missingBoolean = props.getBoolean("missing.boolean");
@@ -55,7 +55,7 @@ class AppPropTypeTests {
     }
 
     @Test
-    void stringTests() {
+    void stringTests() throws PropertyEvaluatorException {
         String testString = props.get("test.string");
         assertEquals("a test string", testString);
         String missingString = props.get("missing.string");
@@ -66,7 +66,7 @@ class AppPropTypeTests {
     @SetEnvironmentVariable(
             key = "test-str",
             value = "my-test-env-val")
-    void stringTestsViaEnv() {
+    void stringTestsViaEnv() throws PropertyEvaluatorException {
         String s = System.getenv("test-str");
         assertEquals("my-test-env-val", s);
         String testStringViaEnv = props.get("test.string-via-env");
@@ -77,7 +77,7 @@ class AppPropTypeTests {
     @SetEnvironmentVariable(
             key = "my-test-env-int",
             value = "4567")
-    void intTestsViaEnv() {
+    void intTestsViaEnv() throws PropertyEvaluatorException {
         String s = System.getenv("my-test-env-int");
         assertEquals("4567", s);
         Integer testIntViaEnv = props.getInteger("test.int-via-env");
@@ -88,7 +88,7 @@ class AppPropTypeTests {
     @SetEnvironmentVariable(
             key = "my-test-env-long",
             value = "5678")
-    void longTestsViaEnv() {
+    void longTestsViaEnv() throws PropertyEvaluatorException {
         String s = System.getenv("my-test-env-long");
         assertEquals("5678", s);
         Long testLongViaEnv = props.getLong("test.long-via-env");
@@ -99,7 +99,7 @@ class AppPropTypeTests {
     @SetEnvironmentVariable(
             key = "my-test-env-boolean",
             value = "t")
-    void booleanTestsViaEnv() {
+    void booleanTestsViaEnv() throws PropertyEvaluatorException {
         String s = System.getenv("my-test-env-boolean");
         assertEquals("t", s);
         Boolean testBooleanViaEnv = props.getBoolean("test.boolean-via-env");
@@ -107,10 +107,15 @@ class AppPropTypeTests {
     }
 
     @Test
+    void stringTestsViaPropMissing() {
+        assertThrows(PropertyEvaluatorException.class, () -> props.get("test.string-via-prop-missing"));
+    }
+
+    @Test
     @SetSystemProperty(
             key = "test-str",
             value = "my-test-prop-val")
-    void stringTestsViaProp() {
+    void stringTestsViaProp() throws PropertyEvaluatorException {
         String s = System.getProperty("test-str");
         assertEquals("my-test-prop-val", s);
         String testStringViaEnv = props.get("test.string-via-prop");
@@ -118,16 +123,10 @@ class AppPropTypeTests {
     }
 
     @Test
-    void stringTestsViaPropMissing() {
-        String testStringViaEnv = props.get("test.string-via-prop");
-        assertNull(testStringViaEnv);
-    }
-
-    @Test
     @SetSystemProperty(
             key = "my-test-prop-int",
             value = "45670")
-    void intTestsViaProp() {
+    void intTestsViaProp() throws PropertyEvaluatorException {
         String s = System.getProperty("my-test-prop-int");
         assertEquals("45670", s);
         Integer testIntViaProp = props.getInteger("test.int-via-prop");
@@ -138,7 +137,7 @@ class AppPropTypeTests {
     @SetSystemProperty(
             key = "my-test-prop-long",
             value = "56780")
-    void longTestsViaProp() {
+    void longTestsViaProp() throws PropertyEvaluatorException {
         String s = System.getProperty("my-test-prop-long");
         assertEquals("56780", s);
         Long testLongViaProp = props.getLong("test.long-via-prop");
@@ -149,7 +148,7 @@ class AppPropTypeTests {
     @SetSystemProperty(
             key = "my-test-prop-boolean",
             value = "t")
-    void booleanTestsViaProp() {
+    void booleanTestsViaProp() throws PropertyEvaluatorException {
         String s = System.getProperty("my-test-prop-boolean");
         assertEquals("t", s);
         Boolean testBooleanViaProp = props.getBoolean("test.boolean-via-prop");

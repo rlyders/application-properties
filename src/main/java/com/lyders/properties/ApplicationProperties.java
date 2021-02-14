@@ -240,15 +240,15 @@ public class ApplicationProperties extends HashMap<String, String> implements Se
         return String.format("propertiesFileName=%s, suffixedFileName=%s, cfg=%s, sources=%s", propertiesFileName, suffixedFileName, cfg.toString(), sources.toString());
     }
 
-    public String get(String propertyName) {
+    public String get(String propertyName) throws PropertyEvaluatorException{
         return get(propertyName, null);
     }
 
-    public String get(String propertyName, String defaultValue) {
+    public String get(String propertyName, String defaultValue)throws PropertyEvaluatorException {
         return get(propertyName, defaultValue, true);
     }
 
-    public String get(String propertyName, String defaultValue, boolean decodeEscapedNewlines) {
+    public String get(String propertyName, String defaultValue, boolean decodeEscapedNewlines) throws PropertyEvaluatorException {
         return get(propertyName, defaultValue, decodeEscapedNewlines, true);
     }
 
@@ -261,7 +261,7 @@ public class ApplicationProperties extends HashMap<String, String> implements Se
      * @param eval                  if true, replace expressions in the form of "${env:mysysenvar}" or "${propr:mysysprop}" with their respective values from System.getenv("mysysenvar") or System.getProperty("mysysprop") respectively
      * @return the value of the property
      */
-    public String get(String propertyName, String defaultValue, boolean decodeEscapedNewlines, boolean eval) {
+    public String get(String propertyName, String defaultValue, boolean decodeEscapedNewlines, boolean eval) throws PropertyEvaluatorException {
         if (cachedProps.containsKey(propertyName)) {
             return cachedProps.get(propertyName);
         }
@@ -284,7 +284,7 @@ public class ApplicationProperties extends HashMap<String, String> implements Se
         return propVal;
     }
 
-    private String evaluateExpression(String propertyName, String propVal) {
+    private String evaluateExpression(String propertyName, String propVal) throws PropertyEvaluatorException {
         Pattern pattern = Pattern.compile(String.format("\\$\\{\\w*(%s|%s)\\w*:(.*?)\\}",
                 PROPERTY_SOURCE_ENV, PROPERTY_SOURCE_PROP));
         Matcher matcher = pattern.matcher(propVal);
@@ -295,7 +295,7 @@ public class ApplicationProperties extends HashMap<String, String> implements Se
                 try {
                     propVal = evaluateMatchedExpression(propVal, matcher);
                 } catch (Exception e) {
-                    throw new IllegalStateException(String.format("Failed to evaluate property '%s' expression '%s': %s", propertyName, matcher.group(0), e.getMessage()));
+                    throw new PropertyEvaluatorException(String.format("Failed to evaluate property '%s' expression '%s': %s", propertyName, matcher.group(0), e.getMessage()));
                 }
             }
             matcher.reset(propVal);
@@ -328,15 +328,15 @@ public class ApplicationProperties extends HashMap<String, String> implements Se
         return expression;
     }
 
-    public Long getLong(String propertyName) {
+    public Long getLong(String propertyName) throws PropertyEvaluatorException{
         return getLong(propertyName, null);
     }
 
-    public Long getLong(String propertyName, String defaultValue) {
+    public Long getLong(String propertyName, String defaultValue) throws PropertyEvaluatorException{
         return getLong(propertyName, defaultValue, true);
     }
 
-    public Long getLong(String propertyName, String defaultValue, boolean eval) {
+    public Long getLong(String propertyName, String defaultValue, boolean eval) throws PropertyEvaluatorException{
         Long val = null;
         String longStr = get(propertyName, defaultValue, eval);
         if (!StringUtils.isEmpty(longStr)) {
@@ -354,15 +354,15 @@ public class ApplicationProperties extends HashMap<String, String> implements Se
         return val;
     }
 
-    public Integer getInteger(String propertyName) {
+    public Integer getInteger(String propertyName) throws PropertyEvaluatorException{
         return getInteger(propertyName, null);
     }
 
-    public Integer getInteger(String propertyName, String defaultValue) {
+    public Integer getInteger(String propertyName, String defaultValue) throws PropertyEvaluatorException{
         return getInteger(propertyName, defaultValue, true);
     }
 
-    public Integer getInteger(String propertyName, String defaultValue, boolean eval) {
+    public Integer getInteger(String propertyName, String defaultValue, boolean eval) throws PropertyEvaluatorException{
         Integer val = null;
         String valStr = get(propertyName, defaultValue, eval);
         if (!StringUtils.isEmpty(valStr)) {
@@ -380,15 +380,15 @@ public class ApplicationProperties extends HashMap<String, String> implements Se
         return val;
     }
 
-    public Boolean getBoolean(String propertyName) {
+    public Boolean getBoolean(String propertyName) throws PropertyEvaluatorException{
         return getBoolean(propertyName, "");
     }
 
-    public Boolean getBoolean(String propertyName, String defaultValue) {
+    public Boolean getBoolean(String propertyName, String defaultValue) throws PropertyEvaluatorException{
         return getBoolean(propertyName, defaultValue, true);
     }
 
-    public Boolean getBoolean(String propertyName, String defaultValue, boolean eval) {
+    public Boolean getBoolean(String propertyName, String defaultValue, boolean eval) throws PropertyEvaluatorException{
         return Boolean.valueOf(get(propertyName, defaultValue, eval));
     }
 

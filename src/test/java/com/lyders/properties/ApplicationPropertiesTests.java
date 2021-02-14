@@ -27,7 +27,7 @@ public class ApplicationPropertiesTests {
         * application.properties
     * */
     @Test
-    public void LoadFromTestResources() throws FileNotFoundException {
+    public void LoadFromTestResources() throws FileNotFoundException, PropertyEvaluatorException {
         ApplicationProperties properties = new ApplicationProperties(null, null);
 //        properties.printAllEntries(System.out);
 
@@ -44,7 +44,7 @@ public class ApplicationPropertiesTests {
         * application-unittest.properties
     * */
     @Test
-    public void LoadFromTestResourcesPlusSuffix() throws FileNotFoundException {
+    public void LoadFromTestResourcesPlusSuffix() throws FileNotFoundException, PropertyEvaluatorException {
         ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(null, "-unittest", LoadClassPathRootPropertiesAsDefaults.YES);
         ApplicationProperties properties = new ApplicationProperties(cfg);
 //        properties.printAllEntries(System.out);
@@ -63,7 +63,7 @@ public class ApplicationPropertiesTests {
         * application.properties
     * */
     @Test
-    public void LoadFromFileSystem() throws FileNotFoundException {
+    public void LoadFromFileSystem() throws FileNotFoundException, PropertyEvaluatorException {
         // System.out.println("working directory: "+System.getProperty("user.dir"));
         ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(null, null, LoadClassPathRootPropertiesAsDefaults.NO);
         ApplicationProperties properties = new ApplicationProperties(cfg, "conf");
@@ -84,7 +84,7 @@ public class ApplicationPropertiesTests {
         b) application-unitest.properties
     * */
     @Test
-    public void LoadFromFileSystemWithUnitTestSuffix() throws FileNotFoundException {
+    public void LoadFromFileSystemWithUnitTestSuffix() throws FileNotFoundException, PropertyEvaluatorException {
         // System.out.println("working directory: "+System.getProperty("user.dir"));
         ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(null, "-unittest", LoadClassPathRootPropertiesAsDefaults.NO);
         ApplicationProperties properties = new ApplicationProperties(cfg, "conf");
@@ -113,7 +113,7 @@ public class ApplicationPropertiesTests {
         b) myapp-unittest.properties
     * */
     @Test
-    public void LoadFromCustomNameFileSystemWithUnitTestSuffix() throws FileNotFoundException {
+    public void LoadFromCustomNameFileSystemWithUnitTestSuffix() throws FileNotFoundException, PropertyEvaluatorException {
         // System.out.println("working directory: "+System.getProperty("user.dir"));
         ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig("myapp.properties", "-unittest", LoadClassPathRootPropertiesAsDefaults.YES);
         ApplicationProperties properties = new ApplicationProperties(cfg, "conf");
@@ -137,7 +137,7 @@ public class ApplicationPropertiesTests {
         test that an exception is thrown when the *suffixed* custom-named properties file is missing from the classpath when suffix is given and loadClassPathRootPropertiesAsDefaults=YES.
     * */
     @Test
-    public void LoadFromCustomNameFileSystemWithUnitTestSuffixButFailBecauseOfAttemptToLoadDefaultThatDoesntExist() throws FileNotFoundException {
+    public void LoadFromCustomNameFileSystemWithUnitTestSuffixButFailBecauseOfAttemptToLoadDefaultThatDoesntExist() {
         // System.out.println("working directory: "+System.getProperty("user.dir"));
         String propBaseFileName = "myapp";
         String propFileName = "myapp" + DEFAULT_PROPERTIES_EXTENSION;
@@ -159,7 +159,7 @@ public class ApplicationPropertiesTests {
         test that an exception is thrown when no properties files can be loaded because loadClassPathRootPropertiesAsDefaults=NO and no file paths were given to search.
     * */
     @Test
-    public void tryToLoadPropertiesWhenNoneExists() throws FileNotFoundException {
+    public void tryToLoadPropertiesWhenNoneExists() {
         String gibberish = "gibberish";
         ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(gibberish, null, LoadClassPathRootPropertiesAsDefaults.NO);
 
@@ -178,7 +178,7 @@ public class ApplicationPropertiesTests {
         test that an exception is thrown when the default-named properties file is missing from the given custom directory in the classpath when loadClassPathRootPropertiesAsDefaults=YES.
     * */
     @Test
-    public void tryToLoadPropertiesFromFileSystemThatDoesNotExist() throws FileNotFoundException {
+    public void tryToLoadPropertiesFromFileSystemThatDoesNotExist() {
         String gibberish = "gibberish";
         ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(null, null, LoadClassPathRootPropertiesAsDefaults.YES, gibberish);
 
@@ -196,7 +196,7 @@ public class ApplicationPropertiesTests {
         test that an exception is thrown when the custom-named properties file is missing from the classpath when loadClassPathRootPropertiesAsDefaults=NO.
     * */
     @Test
-    public void tryToLoadPropertiesFromClassPathThatDoesNotExist() throws FileNotFoundException {
+    public void tryToLoadPropertiesFromClassPathThatDoesNotExist() {
         String gibberish = "gibberish";
         ApplicationPropertiesConfig cfg = new ApplicationPropertiesConfig(gibberish + ".properties", "-" + gibberish, LoadClassPathRootPropertiesAsDefaults.NO, PATH_TYPE.CLASSPATH_PREFIX + gibberish);
 
