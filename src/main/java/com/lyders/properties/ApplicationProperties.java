@@ -2,11 +2,12 @@ package com.lyders.properties;
 
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
@@ -19,7 +20,14 @@ import static com.lyders.properties.ApplicationProperties.PATH_TYPE.*;
  * @author Richard@Lyders.com
  */
 @Data
-public class ApplicationProperties extends HashMap<String, String> {
+public class ApplicationProperties extends HashMap<String, String> implements Serializable {
+
+    private static final long serialVersionUID = 240517204195025182L;
+
+    private static final Log LOG = LogFactory.getLog(ApplicationProperties.class);
+
+    private static final String PROPERTY_SOURCE_ENV = "env";
+    private static final String PROPERTY_SOURCE_PROP = "prop";
 
     public enum PATH_TYPE {
         CLASSPATH_PREFIX("classpath:"),
@@ -28,10 +36,11 @@ public class ApplicationProperties extends HashMap<String, String> {
 
         public final String value;
 
-        private PATH_TYPE(String value) {
+        PATH_TYPE(String value) {
             this.value = value;
         }
 
+        @Override
         public String toString() {
             return this.value;
         }
@@ -47,6 +56,8 @@ public class ApplicationProperties extends HashMap<String, String> {
     private final String suffixedFileName;
 
     private final LinkedHashMap<String, Properties> sources = new LinkedHashMap<>();
+
+    private final HashMap<String, String> cachedProps = new HashMap<>();
 
     /* Overloaded constructor that passes null for config parameter of main constructor
      * */
@@ -88,9 +99,9 @@ public class ApplicationProperties extends HashMap<String, String> {
     void loadPropertiesFromClassPath(String pathStr, String propertiesFileName) throws FileNotFoundException {
         String filePathStr = Paths.get(pathStr, propertiesFileName).toString();
         URL res = this.getClass().getClassLoader().getResource(filePathStr);
-        try {
+        try (InputStream in = res.openStream()) {
             Properties properties = new Properties();
-            properties.load(res.openStream());
+            properties.load(in);
             logSourceFilePathAndProperties(res.toString(), properties);
             putAll((Map) properties);
         } catch (NullPointerException | IOException e) {
@@ -100,7 +111,7 @@ public class ApplicationProperties extends HashMap<String, String> {
 
     void loadPropertiesFromFileSystem(String pathStr, String propertiesFileName) throws FileNotFoundException {
         String filePathStr = Paths.get(pathStr, propertiesFileName).toAbsolutePath().toString();
-        try (FileReader fileReader = new FileReader(filePathStr, Charset.forName("UTF-8"))) {
+        try (FileReader fileReader = new FileReader(filePathStr, StandardCharsets.UTF_8)) {
             Properties properties = new Properties();
             properties.load(fileReader);
             logSourceFilePathAndProperties(filePathStr, properties);
@@ -112,7 +123,7 @@ public class ApplicationProperties extends HashMap<String, String> {
 
     void loadPropertiesFromServletPath(String pathStr, String propertiesFileName) throws FileNotFoundException {
         String filePathStr = Paths.get(cfg.getServletPropertiesBaseDirectory(), pathStr, propertiesFileName).toAbsolutePath().toString();
-        try (FileReader fileReader = new FileReader(filePathStr, Charset.forName("UTF-8"))) {
+        try (FileReader fileReader = new FileReader(filePathStr, StandardCharsets.UTF_8)) {
             Properties properties = new Properties();
             properties.load(fileReader);
             logSourceFilePathAndProperties(filePathStr, properties);
@@ -150,40 +161,49 @@ public class ApplicationProperties extends HashMap<String, String> {
                 }
                 String pathStr = matcher.group(2);
 
-                if (StringUtils.isEmpty(pathType)) {
-                    if (cfg.getServletContext() != null) {
-                        pathType = SERVLET_PREFIX.value;
-                    } else {
-                        pathType = FILEPATH_PREFIX.value;
-                    }
-                }
-                if (CLASSPATH_PREFIX.value.equals(pathType)) {
-                    loadPropertiesFromClassPath(pathStr, propertiesFileName);
-                    if (suffixedFileName != null) {
-                        loadPropertiesFromClassPath(pathStr, suffixedFileName);
-                    }
-                } else if (SERVLET_PREFIX.value.equals(pathType)) {
-                    loadPropertiesFromServletPath(pathStr, propertiesFileName);
-                    if (suffixedFileName != null) {
-                        loadPropertiesFromServletPath(pathStr, suffixedFileName);
-                    }
-                } else if (FILEPATH_PREFIX.value.equals(pathType)) {
-                    loadPropertiesFromFileSystem(pathStr, propertiesFileName);
-                    if (suffixedFileName != null) {
-                        loadPropertiesFromFileSystem(pathStr, suffixedFileName);
-                    }
-                } else {
-                    throw new IllegalArgumentException("Unknown properties path type prefix: " + pathType);
-                }
+                pathType = getPathTypeDefault(cfg, pathType);
+                loadFromPathType(pathType, pathStr);
             }
 
         }
     }
 
+    private void loadFromPathType(String pathType, String pathStr) throws FileNotFoundException {
+        if (CLASSPATH_PREFIX.value.equals(pathType)) {
+            loadPropertiesFromClassPath(pathStr, propertiesFileName);
+            if (suffixedFileName != null) {
+                loadPropertiesFromClassPath(pathStr, suffixedFileName);
+            }
+        } else if (SERVLET_PREFIX.value.equals(pathType)) {
+            loadPropertiesFromServletPath(pathStr, propertiesFileName);
+            if (suffixedFileName != null) {
+                loadPropertiesFromServletPath(pathStr, suffixedFileName);
+            }
+        } else if (FILEPATH_PREFIX.value.equals(pathType)) {
+            loadPropertiesFromFileSystem(pathStr, propertiesFileName);
+            if (suffixedFileName != null) {
+                loadPropertiesFromFileSystem(pathStr, suffixedFileName);
+            }
+        } else {
+            throw new IllegalArgumentException("Unknown properties path type prefix: " + pathType);
+        }
+    }
+
+    private String getPathTypeDefault(ApplicationPropertiesConfig cfg, String pathType) {
+        if (StringUtils.isEmpty(pathType)) {
+            if (cfg.getServletContext() != null) {
+                pathType = SERVLET_PREFIX.value;
+            } else {
+                pathType = FILEPATH_PREFIX.value;
+            }
+        }
+        return pathType;
+    }
+
     /* utility method to print out a list of all the final property values
      * */
     public void printAllProperties(Consumer<String> f) {
-        for (Map.Entry entry : entrySet()) {
+        for (Map.Entry<String, String> entry : entrySet()) {
             f.accept(entry.getKey() + ": " + entry.getValue());
         }
     }
@@ -191,12 +211,18 @@ public class ApplicationProperties extends HashMap<String, String> {
     /* utility method to print out a detailed list of which properties were loaded from each file
      * */
     public void printAllSourcesAndProperties(Consumer<String> f) {
+        if (!cfg.isLogSourceFilePathsAndProperties()) {
+            f.accept("Logging of source files paths and properties is not enabled");
+        }
+        if (sources.isEmpty()) {
+            f.accept("No source files found");
+        }
         int fileIdx = 0;
-        for (Map.Entry source : sources.entrySet()) {
-            String fileName = (String) source.getKey();
+        for (Map.Entry<String, Properties> source : sources.entrySet()) {
+            String fileName = source.getKey();
             f.accept(String.format("Source file %d: %s", ++fileIdx, fileName));
-            Properties properties = (Properties) source.getValue();
-            Iterator iterator = properties.keySet().iterator();
+            Properties properties = source.getValue();
+            Iterator<Object> iterator = properties.keySet().iterator();
             while (iterator.hasNext()) {
                 String key = (String) iterator.next();
                 f.accept(String.format("    %s=%s", key, properties.get(key)));
@@ -212,6 +238,158 @@ public class ApplicationProperties extends HashMap<String, String> {
 
     public String toString() {
         return String.format("propertiesFileName=%s, suffixedFileName=%s, cfg=%s, sources=%s", propertiesFileName, suffixedFileName, cfg.toString(), sources.toString());
+    }
+
+    public String get(String propertyName) {
+        return get(propertyName, null);
+    }
+
+    public String get(String propertyName, String defaultValue) {
+        return get(propertyName, defaultValue, true);
+    }
+
+    public String get(String propertyName, String defaultValue, boolean decodeEscapedNewlines) {
+        return get(propertyName, defaultValue, decodeEscapedNewlines, true);
+    }
+
+    /**
+     * return the value of a defined property
+     *
+     * @param propertyName          the name of the property to return the value of
+     * @param defaultValue          the value to return if the value for the property is empty
+     * @param decodeEscapedNewlines if true, decode escaped new line characters
+     * @param eval                  if true, replace expressions in the form of "${env:mysysenvar}" or "${propr:mysysprop}" with their respective values from System.getenv("mysysenvar") or System.getProperty("mysysprop") respectively
+     * @return the value of the property
+     */
+    public String get(String propertyName, String defaultValue, boolean decodeEscapedNewlines, boolean eval) {
+        if (cachedProps.containsKey(propertyName)) {
+            return cachedProps.get(propertyName);
+        }
+
+        String propVal = super.get(propertyName);
+        if (StringUtils.isEmpty(propVal)) {
+            propVal = defaultValue;
+        }
+        if (propVal == null) {
+            LOG.warn(String.format("No value found for application property: %s", propertyName));
+        } else {
+            if (eval) {
+                propVal = evaluateExpression(propertyName, propVal);
+            }
+            if (decodeEscapedNewlines) {
+                propVal = propVal.replace("\\n", "\n");
+            }
+        }
+        cachedProps.put(propertyName, propVal);
+        return propVal;
+    }
+
+    private String evaluateExpression(String propertyName, String propVal) {
+        Pattern pattern = Pattern.compile(String.format("\\$\\{\\w*(%s|%s)\\w*:(.*?)\\}",
+                PROPERTY_SOURCE_ENV, PROPERTY_SOURCE_PROP));
+        Matcher matcher = pattern.matcher(propVal);
+        while (matcher.find()) {
+            String propSource = matcher.group(1);
+            String propSourceVarName = matcher.group(2);
+            if (!StringUtils.isEmpty(propSource) && !StringUtils.isEmpty(propSourceVarName)) {
+                try {
+                    propVal = evaluateMatchedExpression(propVal, matcher);
+                } catch (Exception e) {
+                    throw new IllegalStateException(String.format("Failed to evaluate property '%s' expression '%s': %s", propertyName, matcher.group(0), e.getMessage()));
+                }
+            }
+            matcher.reset(propVal);
+        }
+        return propVal;
+    }
+
+    private String evaluateMatchedExpression(String expression, Matcher matcher) {
+        String placeholder = matcher.group(0);
+        String propSource = matcher.group(1);
+        String propSourceVarName = matcher.group(2);
+        String propSourceVarValue;
+        switch (propSource) {
+            case PROPERTY_SOURCE_ENV:
+                propSourceVarValue = System.getenv(propSourceVarName);
+                break;
+            case PROPERTY_SOURCE_PROP:
+                propSourceVarValue = System.getProperty(propSourceVarName);
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("Unknown property source: %s", propSource));
+        }
+        if (propSourceVarValue == null) {
+            throw new IllegalArgumentException(String.format("No value found for system %s: %s", propSource, propSourceVarName));
+        }
+        expression = expression.replace(placeholder, propSourceVarValue);
+        if (StringUtils.isEmpty(expression)) {
+            LOG.warn(String.format("Missing value for environment variable '%s'", propSourceVarName));
+        }
+        return expression;
+    }
+
+    public Long getLong(String propertyName) {
+        return getLong(propertyName, null);
+    }
+
+    public Long getLong(String propertyName, String defaultValue) {
+        return getLong(propertyName, defaultValue, true);
+    }
+
+    public Long getLong(String propertyName, String defaultValue, boolean eval) {
+        Long val = null;
+        String longStr = get(propertyName, defaultValue, eval);
+        if (!StringUtils.isEmpty(longStr)) {
+            try {
+                val = Long.valueOf(longStr);
+            } catch (NumberFormatException e) {
+                LOG.warn(String.format("Failed to convert '%s' to Long, so trying default '%s': %s", longStr, defaultValue, e.getMessage()));
+                try {
+                    val = Long.valueOf(defaultValue);
+                } catch (NumberFormatException e2) {
+                    LOG.warn(String.format("Failed to convert default value '%s' to Long: %s", defaultValue, e.getMessage()));
+                }
+            }
+        }
+        return val;
+    }
+
+    public Integer getInteger(String propertyName) {
+        return getInteger(propertyName, null);
+    }
+
+    public Integer getInteger(String propertyName, String defaultValue) {
+        return getInteger(propertyName, defaultValue, true);
+    }
+
+    public Integer getInteger(String propertyName, String defaultValue, boolean eval) {
+        Integer val = null;
+        String valStr = get(propertyName, defaultValue, eval);
+        if (!StringUtils.isEmpty(valStr)) {
+            try {
+                val = Integer.valueOf(valStr);
+            } catch (NumberFormatException e) {
+                LOG.warn(String.format("Failed to convert '%s' to Integer, so trying default '%s': %s", valStr, defaultValue, e.getMessage()));
+                try {
+                    val = Integer.valueOf(defaultValue);
+                } catch (NumberFormatException e2) {
+                    LOG.warn(String.format("Failed to convert default value '%s' to Integer: %s", defaultValue, e.getMessage()));
+                }
+            }
+        }
+        return val;
+    }
+
+    public Boolean getBoolean(String propertyName) {
+        return getBoolean(propertyName, "");
+    }
+
+    public Boolean getBoolean(String propertyName, String defaultValue) {
+        return getBoolean(propertyName, defaultValue, true);
+    }
+
+    public Boolean getBoolean(String propertyName, String defaultValue, boolean eval) {
+        return Boolean.valueOf(get(propertyName, defaultValue, eval));
     }
 
 }

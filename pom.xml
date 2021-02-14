@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.lyders</groupId>
     <artifactId>application-properties</artifactId>
-    <version>1.1.7</version>
+    <version>1.1.9</version>
 
     <name>ApplicationProperties Java properties loader</name>
     <description>
-        This ApplicationProperties Java package provides a fast and easily configurable application.properties loader that mimics some key features of the Spring Boot application.properties loader. This package allows for multi-level overloading of properties based on a basename and optional suffix by searching the classpath, optional configurable file paths along with the JNDI server container context.
+        This ApplicationProperties Java package provides a fast and easily configurable application.properties loader
+        that mimics some key features of the Spring Boot application.properties loader. This package allows for
+        multi-level overloading of properties based on a basename and optional suffix by searching the classpath,
+        optional configurable file paths along with the JNDI server container context.
 
-        The class [ApplicationPropertiesConfig](src/main/java/com/lyders/application-properties/ApplicationPropertiesConfig.java) controls the features of the overloading of properties such as the base name of the properties file, an optional suffix that allows for the loading of environment-specific or scenario-specific property files as needed.
+        The class
+        [ApplicationPropertiesConfig](src/main/java/com/lyders/application-properties/ApplicationPropertiesConfig.java)
+        controls the features of the overloading of properties such as the base name of the properties file, an optional
+        suffix that allows for the loading of environment-specific or scenario-specific property files as needed.
 
         The following features are supported:
         * Names of properties files can be customized
@@ -138,19 +145,18 @@
             <version>1.18.12</version>
             <scope>provided</scope>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit-jupiter.version}</version>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.6.3</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
+        <!-- https://mvnrepository.com/artifact/org.junit-pioneer/junit-pioneer -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit-jupiter.version}</version>
+            <groupId>org.junit-pioneer</groupId>
+            <artifactId>junit-pioneer</artifactId>
+            <version>1.3.0</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
@@ -158,13 +164,36 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.1</version>
-            <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.30</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.scm</groupId>
+            <artifactId>maven-scm-api</artifactId>
+            <version>1.11.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>3.7.7</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
